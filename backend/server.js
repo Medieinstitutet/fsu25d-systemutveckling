@@ -40,7 +40,7 @@ app.get("/api/me/", (req, res) => {
 
 let count = 0;
 app.get("/api/count/", (req, res) => {
-    count++; //
+    count++;
     res.json({"count": count});
 });
 
