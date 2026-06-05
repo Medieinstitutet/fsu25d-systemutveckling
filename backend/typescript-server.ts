@@ -77,9 +77,31 @@ app.post("/", (req, res) => {
 });
 
 app.get("/api/me/", (req, res) => {
-    res.json({"userId": (req.session as any).userId});
+    res.json({"username": (req.session as any).username});
 });
 
+app.post("/api/login/", (req, res) => {
+
+    let username = req.body.username;
+    let password = req.body.password;
+
+    if(password === "qwerty123") {
+        (req.session as any).username = username;
+        res.json({"success": true});
+        return;
+    }
+
+    res.json({"success": false});
+});
+
+app.post("/api/logout/", (req, res) => {
+
+    (req.session as any).username = null;
+
+    res.json({"success": false});
+});
+
+/*
 app.get("/api/me/set/:id", (req, res) => {
 
     (req.session as any).userId = req.params.id;
@@ -87,6 +109,7 @@ app.get("/api/me/set/:id", (req, res) => {
 
     res.json({"userId": req.params.id});
 });
+*/
 
 app.get("/api/user/:userId/posts/:postId", (req, res) => {
 
