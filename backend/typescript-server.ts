@@ -3,6 +3,7 @@ import express, {Request, Response} from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import expressSession from "express-session";
+import fs from "node:fs";
 
 //Importera egna filer
 //import productsRouter from "./product-routes";
@@ -105,6 +106,20 @@ let count = 0;
 app.get("/api/count/", (req, res) => {
     count++;
     res.json({"count": count});
+});
+
+let catchAllHtml:string = "";
+fs.readFile("./public/index.html", (err, data) => {
+    catchAllHtml = data.toString();
+});
+
+/*
+let data = fs.readFileSync("./public/index.html");
+catchAllHtml = data.toString();
+*/
+
+app.get(/^(.*)$/, (req, res) => {
+    res.send(catchAllHtml);
 });
 
 //Använd port från .env eller 3000 om inte angiven
