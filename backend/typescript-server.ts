@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 import cors from "cors";
 import expressSession from "express-session";
 import fs from "node:fs";
+import {connect} from "./database";
+import { ObjectId } from "mongodb";
+import {connect as mysqlConnect} from "./mysql-database";
 
 //Importera egna filer
 //import productsRouter from "./product-routes";
@@ -76,8 +79,21 @@ app.post("/", (req, res) => {
     res.send(name.toUpperCase());
 });
 
-app.get("/api/me/", (req, res) => {
-    res.json({"username": (req.session as any).username});
+app.get("/api/me/", async (req, res) => {
+    let db = await connect();
+
+    /*
+    let user = await db.collection("users").findOne({
+        _id: new ObjectId('6a26885d2d7887f0c6d8571d')
+    });
+    */
+
+    let user = await db.collection("users").findOne({
+        email: (req.session as any).username
+    });
+    console.log(user);
+
+    res.json({"username": (req.session as any).username, data: user});
 });
 
 app.post("/api/login/", (req, res) => {
@@ -148,7 +164,58 @@ app.get(/^(.*)$/, (req, res) => {
 //Använd port från .env eller 3000 om inte angiven
 let port = process.env.PORT || 3000;
 
-//Starta webservern
-app.listen(port, () => {
-    console.log("Listening to " + port);
-})
+let start = async () => {
+    /*
+    let db = await connect();
+
+
+    let ordersCollection = db.collection("orders");
+    let ordersFindCursor = ordersCollection.find();
+    let orders = await ordersFindCursor.toArray();
+    
+
+    let orders2 = await db.collection("orders").find().toArray();
+
+    let filterOrders = await db.collection("orders").aggregate([
+  {
+    $lookup:
+      {
+        from: "orderStatus",
+        localField: "status",
+        foreignField: "_id",
+        as: "statusObject"
+      }
+  },
+  {
+    $unset:
+      "status"
+  },
+  {
+    $unwind:
+      {
+        path: "$statusObject"
+      }
+  }
+]).toArray();
+    console.log(filterOrders);
+    */
+
+    /*
+    let result = await db.collection("users").insertOne({
+        "name": "Mattias",
+        "email": "mattias@example.com"
+    });
+    console.log(result);
+    */
+
+    await mysqlConnect();
+
+    //Starta webservern
+    app.listen(port, () => {
+        console.log("Listening to " + port);
+    })
+}
+
+start();
+
+
