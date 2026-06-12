@@ -151,6 +151,7 @@ app.get("/api/count/", (req, res) => {
     res.json({"count": count});
 });
 
+//
 let diskStorage = multer.diskStorage({
     "destination": (req, file, cb) => {
         cb(null, "public/uploads")
@@ -160,11 +161,26 @@ let diskStorage = multer.diskStorage({
         let fileName = crypto.randomUUID();
         cb(null, fileName + extension);
     }
-})
+});
 
+//VPS
+let multerUpload = multer({
+    "storage": diskStorage
+});
+
+/*
+//VPS med fs
+let multerUpload = multer({
+    "dest": "public/uploads"
+});
+*/
+
+/*
+//Vercel
 let multerUpload = multer({
     "storage": multer.memoryStorage()
 });
+*/
 
 app.post("/api/image-upload", multerUpload.single("image"), async (req, res) => {
     console.log("/api/image-upload");
@@ -174,12 +190,15 @@ app.post("/api/image-upload", multerUpload.single("image"), async (req, res) => 
 
     let fileName = null;
     /*
+    //VPS: döp om med fs
     if(req.file) {
         fileName = req.file.originalname.split("/").join("-");
         fs.renameSync(req.file.path, "public/uploads/" + fileName);
     }
     */
 
+    /*
+    //Vercel
     if(req.file) {
         let extension = path.extname(req.file.originalname);
         let putFileName = crypto.randomUUID();
@@ -188,6 +207,7 @@ app.post("/api/image-upload", multerUpload.single("image"), async (req, res) => 
 
         fileName = result.url;
     }
+    */
 
     res.json({"url": fileName});
 })
