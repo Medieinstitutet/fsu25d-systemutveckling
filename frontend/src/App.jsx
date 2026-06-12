@@ -39,6 +39,25 @@ function App() {
     setValues(newValues);
   }
 
+  let uploadImage = () => {
+    let loadData = async () => {
+
+      let body = new FormData();
+      body.append("name", "Sko");
+      body.append("image", document.getElementById("uploadField").files[0]);
+      console.log(document.getElementById("uploadField").files[0]);
+      console.dir(document.getElementById("uploadField"));
+
+      let reponse = await fetch("/api/image-upload/", {
+        "method": "POST",
+        "body": body
+      });
+      let data = await reponse.json();
+      console.log(data);
+    }
+    loadData();
+  }
+
   return (
     <>
     <CartContext value={{values, setValues: updateCart}}>
@@ -49,6 +68,8 @@ function App() {
         <ProductCard id={3} />
         <Cart />
         <LoginForm />
+        <input id="uploadField" type="file" />
+        <button onClick={uploadImage}>Upload</button>
       </UserContext>
       
     </CartContext>

@@ -7,6 +7,10 @@ import fs from "node:fs";
 import {connect} from "./database";
 import { ObjectId } from "mongodb";
 import {connect as mysqlConnect} from "./mysql-database";
+import multer from "multer";
+import path from "node:path";
+import crypto from "node:crypto";
+import {put} from "@vercel/blob";
 
 //Importera egna filer
 //import productsRouter from "./product-routes";
@@ -147,6 +151,48 @@ app.get("/api/count/", (req, res) => {
     res.json({"count": count});
 });
 
+let diskStorage = multer.diskStorage({
+    "destination": (req, file, cb) => {
+        cb(null, "public/uploads")
+    },
+    "filename": (req, file, cb) => {
+        let extension = path.extname(file.originalname);
+        let fileName = crypto.randomUUID();
+        cb(null, fileName + extension);
+    }
+})
+
+let multerUpload = multer({
+    "storage": multer.memoryStorage()
+});
+
+app.post("/api/image-upload", multerUpload.single("image"), async (req, res) => {
+    console.log("/api/image-upload");
+    console.log(req);
+    console.log(req.body);
+    console.log(req.file);
+
+    let fileName = null;
+    /*
+    if(req.file) {
+        fileName = req.file.originalname.split("/").join("-");
+        fs.renameSync(req.file.path, "public/uploads/" + fileName);
+    }
+    */
+
+    if(req.file) {
+        let extension = path.extname(req.file.originalname);
+        let putFileName = crypto.randomUUID();
+
+        let result = await put(putFileName + extension, req.file.buffer, {access: "public"});
+
+        fileName = result.url;
+    }
+
+    res.json({"url": fileName});
+})
+
+
 let catchAllHtml:string = "";
 fs.readFile("./public/index.html", (err, data) => {
     catchAllHtml = data.toString();
@@ -208,7 +254,7 @@ let start = async () => {
     console.log(result);
     */
 
-    await mysqlConnect();
+    //await mysqlConnect();
 
     //Starta webservern
     app.listen(port, () => {
